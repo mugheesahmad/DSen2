@@ -49,6 +49,52 @@ def DSen2_60(d10, d20, d60, deep=False):
     images *= SCALE
     return images
 
+def Custom_DSen2_20(d10, d20, deep=False):
+    # Input to the funcion must be of shape:
+    #     d10: [x,y,4]      (B2, B3, B4, B8)
+    #     d20: [x/2,y/4,6]  (B5, B6, B7, B8a, B11, B12)
+    #     deep: specifies whether to use VDSen2 (True), or DSen2 (False)
+
+    #border = 8
+    #p10, p20 = get_test_patches(d10, d20, patchSize=128, border=border)
+    p10 = d10.transpose(2,0,1)
+    p10 = p10.reshape(1,4,64,64)
+    p20 = d20.transpose(2,0,1)
+    p20 = p20.reshape(1,6,64,64)
+    p10 /= SCALE
+    p20 /= SCALE
+    test = [p10, p20]
+    input_shape = ((4, None, None), (6, None, None))
+    images = _predict(test, input_shape, deep=deep)
+    #images = recompose_images(prediction, border=border, size=d10.shape)
+    images *= SCALE
+    return images
+
+def Custom_DSen2_60(d10, d20, d60, deep=False):
+    # Input to the funcion must be of shape:
+    #     d10: [x,y,4]      (B2, B3, B4, B8)
+    #     d20: [x/2,y/4,6]  (B5, B6, B7, B8a, B11, B12)
+    #     d60: [x/6,y/6,2]  (B1, B9) -- NOT B10
+    #     deep: specifies whether to use VDSen2 (True), or DSen2 (False)
+
+    #border = 12
+    #p10, p20, p60 = get_test_patches60(d10, d20, d60, patchSize=192, border=border)
+    p10 = d10.transpose(2,0,1)
+    p10 = p10.reshape(1,4,64,64)
+    p20 = d20.transpose(2,0,1)
+    p20 = p20.reshape(1,6,64,64)
+    p60 = d60.transpose(2,0,1)
+    p60 = p60.reshape(1,2,64,64)
+    p10 /= SCALE
+    p20 /= SCALE
+    p60 /= SCALE
+    test = [p10, p20, p60]
+    input_shape = ((4, None, None), (6, None, None), (2, None, None))
+    images = _predict(test, input_shape, deep=deep, run_60=True)
+    #images = recompose_images(prediction, border=border, size=d10.shape)
+    images *= SCALE
+    return images
+
 
 def _predict(test, input_shape, deep=False, run_60=False):
     # create model
